@@ -1,0 +1,83 @@
+
+{% extends 'base.html' %}
+{% block content %}
+<h2 class="h5 mb-3">Relatórios</h2>
+
+<form class="row g-3 mb-3" method="get">
+  <div class="col-md-3">
+    <label class="form-label">Estação</label>
+    <select name="station_id" class="form-select">
+      <option value="">Todas</option>
+      {% for st in stations %}
+      <option value="{{ st.id }}" {% if sel_station == st.id %}selected{% endif %}>{{ st.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-3">
+    <label class="form-label">Início (YYYY-MM-DD)</label>
+    <input class="form-control" type="date" name="start" value="{{ start }}">
+  </div>
+  <div class="col-md-3">
+    <label class="form-label">Fim (YYYY-MM-DD)</label>
+    <input class="form-control" type="date" name="end" value="{{ end }}">
+  </div>
+  <div class="col-md-3 d-flex align-items-end">
+    <button class="btn btn-primary w-100">Filtrar</button>
+  </div>
+</form>
+
+<div class="row g-3">
+  <div class="col-md-12">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Totais</h5>
+        <div class="row">
+          <div class="col-md-2"><strong>Horas:</strong> {{ '%.2f'|format(totals.hours) }} h</div>
+          <div class="col-md-2"><strong>Mi:</strong> {{ '%.2f'|format(totals.miles) }}</div>
+          <div class="col-md-2"><strong>Receita:</strong> ${{ '%.2f'|format(totals.revenue) }}</div>
+          <div class="col-md-2"><strong>Gorjetas:</strong> ${{ '%.2f'|format(totals.tips) }}</div>
+          <div class="col-md-2"><strong>Custo:</strong> ${{ '%.2f'|format(totals.cost) }}</div>
+          <div class="col-md-2"><strong>Lucro:</strong> ${{ '%.2f'|format(totals.lucro) }}</div>
+        </div>
+        <div class="mt-2"><strong>Margem de lucro:</strong> {{ '%.2f'|format(totals.margin_pct) }}%</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<table class="table table-sm table-striped align-middle mt-3">
+  <thead>
+    <tr>
+      <th>#</th><th>Estação</th><th>Início</th><th>Fim</th><th>Horas</th>
+      <th>Mi</th><th>Receita</th><th>Gorjetas</th><th>Custo</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for r in runs %}
+    <tr>
+      <td>{{ r.id }}</td>
+      <td>{{ r.station.name }}</td>
+      <td>{{ r.start_dt.strftime('%Y-%m-%d %H:%M') }}</td>
+      <td>{{ r.end_dt.strftime('%Y-%m-%d %H:%M') }}</td>
+      <td>{{ '%.2f'|format(r.hours) }}</td>
+      <td>{{ '%.2f'|format(r.miles or 0) }}</td>
+      <td>${{ '%.2f'|format(r.revenue or 0) }}</td>
+      <td>${{ '%.2f'|format(r.tips or 0) }}</td>
+      <td>${{ '%.2f'|format(r.cost or 0) }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="9" class="text-muted">Sem corridas no período.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<form class="row g-3 mt-4" method="post" onsubmit="return confirm('Remover TODAS as corridas com início ANTES desta data? Esta ação é irreversível.');">
+  <div class="col-md-4">
+    <label class="form-label">Excluir corridas anteriores a (YYYY-MM-DD)</label>
+    <input class="form-control" type="date" name="delete_before" required>
+  </div>
+  <div class="col-md-4 d-flex align-items-end">
+    <button class="btn btn-outline-danger">Excluir corridas antigas</button>
+  </div>
+</form>
+{% endblock %}

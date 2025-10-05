@@ -1,0 +1,32 @@
+
+{% extends 'base.html' %}
+{% block content %}
+<h2 class="h5 mb-3">{{ title }}</h2>
+<form method="post">
+  {{ form.hidden_tag() }}
+  <div class="row g-3">
+    <div class="col-md-6">
+      {{ form.station_id.label(class="form-label") }}
+      {{ form.station_id(class="form-select") }}
+    </div>
+    <div class="col-md-3">
+      {{ form.start_dt.label(class="form-label") }}
+      {{ form.start_dt(class="form-control") }}
+    </div>
+    <div class="col-md-3">
+      {{ form.end_dt.label(class="form-label") }}
+      {{ form.end_dt(class="form-control") }}
+    </div>
+  </div>
+  <div class="row g-3 mt-1">
+    <div class="col-md-3">{{ form.miles.label(class="form-label") }} {{ form.miles(class="form-control") }}</div>
+    <div class="col-md-3">{{ form.revenue.label(class="form-label") }} {{ form.revenue(class="form-control") }}</div>
+    <div class="col-md-3">{{ form.tips.label(class="form-label") }} {{ form.tips(class="form-control") }}</div>
+    <div class="col-md-3">{{ form.cost.label(class="form-label") }} {{ form.cost(class="form-control") }}</div>
+  </div>
+  <div class="mt-3">
+    <button class="btn btn-primary">{{ form.submit.label.text }}</button>
+    <a class="btn btn-link" href="{{ url_for('runs') }}">Cancelar</a>
+  </div>
+</form>
+{% endblock %}
