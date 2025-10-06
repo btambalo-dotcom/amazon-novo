@@ -23,10 +23,12 @@
         <td class="text-start {{ 'other-month' if d.month != first.month else '' }}">
           <div class="small fw-bold">{{ d.day }}/{{ '%02d' % d.month }}</div>
           {% for r in cell.rides %}
-            <a class="badge-run text-decoration-none" href="{{ url_for('rides.view', ride_id=r.id) }}">
+            {% set total = (r.valor + r.gorjeta) %}
+            {% set cls = 'total-low' if total < 50 else ('total-med' if total < 100 else 'total-high') %}
+            <a class="badge-run {{ cls }} text-decoration-none" href="{{ url_for('rides.view', ride_id=r.id) }}">
               <div class="title">{{ r.titulo or 'Corrida' }}</div>
               <div>{{ r.inicio.strftime('%H:%M') }}–{{ r.fim.strftime('%H:%M') }}</div>
-              <div>${{ '%.2f'|format(r.valor + r.gorjeta) }}</div>
+              <div>${{ '%.2f'|format(total) }}</div>
             </a>
           {% endfor %}
         </td>

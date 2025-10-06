@@ -8,7 +8,11 @@
   <style>
     .calendar th, .calendar td { min-width: 190px; vertical-align: top; }
     .calendar .other-month { color: #9aa0a6; }
-    .badge-run { display:block; padding:.25rem .5rem; margin:.25rem 0; border-radius:.4rem; border:1px solid #e0e0e0; background:#fff; }
+    .badge-run { display:block; padding:.35rem .55rem; margin:.3rem 0; border-radius:.5rem; border:1px solid #e3e3e3; background:#ffffff; box-shadow:0 1px 1px rgba(0,0,0,.04); }
+.badge-run .title { font-weight:600; }
+.badge-run.total-low { background:#e8f5e9; }      /* ganhos baixos */
+.badge-run.total-med { background:#fff8e1; }      /* ganhos médios */
+.badge-run.total-high { background:#e3f2fd; }     /* ganhos altos */
     .badge-run .title { font-weight:600; }
     .sticky-header { position: sticky; top: 0; z-index: 2; }
   </style>

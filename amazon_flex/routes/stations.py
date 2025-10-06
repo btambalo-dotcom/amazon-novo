@@ -8,10 +8,10 @@ def index():
     items = Station.query.order_by(Station.nome).all()
     return render_template("stations/index.html", items=items)
 
-@bp.route("/nova", methods=["GET","POST")
+@bp.route("/nova", methods=["GET", "POST"])
 def nova():
     if request.method == "POST":
-        s = Station(nome=request.form["nome".strip(), hub=request.form.get("hub") or None)
+        s = Station(nome=request.form["nome"].strip(), hub=request.form.get("hub") or None)
         db.session.add(s)
         db.session.commit()
         flash("Estação criada!", "success")
