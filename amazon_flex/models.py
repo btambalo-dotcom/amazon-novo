@@ -27,41 +27,38 @@ class Expense(db.Model):
     __tablename__ = "expenses"
     id = db.Column(db.Integer, primary_key=True)
     data = db.Column(db.Date, nullable=False, default=datetime.utcnow)
-    tipo = db.Column(db.String(50), nullable=False, default="combustivel")  # combustivel|pedagio|outros
+    tipo = db.Column(db.String(50), nullable=False, default="combustivel")
     descricao = db.Column(db.String(200), nullable=True)
     valor = db.Column(db.Float, nullable=False, default=0.0)
     ride_id = db.Column(db.Integer, db.ForeignKey("rides.id"), nullable=False)
     ride = db.relationship("ScheduledRide", backref=db.backref("despesas", lazy=True, cascade="all, delete-orphan"))
 
-def _colunas_existentes(table):
-    # Funciona em SQLite; em Postgres, create_all cobre alterações maiores.
+def _cols(table):
     try:
         rows = db.session.execute(text(f"PRAGMA table_info({table})")).all()
         return {r[1] for r in rows}
     except Exception:
         return set()
 
-def _add_col_if_missing(table, col_sql):
-    # col_sql: e.g. "ALTER TABLE expenses ADD COLUMN tipo VARCHAR(50) DEFAULT 'combustivel' NOT NULL"
+def _add(sql):
     try:
-        db.session.execute(text(col_sql))
+        db.session.execute(text(sql))
         db.session.commit()
     except Exception as e:
         db.session.rollback()
-        print(f"[MIGRA] ignorando erro ao adicionar coluna: {e}")
+        print(f"[MIGRA] ignorado: {e}")
 
 def ensure_schema():
     db.create_all()
-    # Tentativa de migração leve em SQLite para bancos antigos
-    cols = _colunas_existentes("expenses")
+    cols = _cols("expenses")
     if cols:
         if "tipo" not in cols:
-            _add_col_if_missing("expenses", "ALTER TABLE expenses ADD COLUMN tipo VARCHAR(50) DEFAULT 'combustivel' NOT NULL")
+            _add("ALTER TABLE expenses ADD COLUMN tipo VARCHAR(50) DEFAULT 'combustivel' NOT NULL")
         if "descricao" not in cols:
-            _add_col_if_missing("expenses", "ALTER TABLE expenses ADD COLUMN descricao VARCHAR(200)")
-    cols_s = _colunas_existentes("stations")
+            _add("ALTER TABLE expenses ADD COLUMN descricao VARCHAR(200)")
+    cols_s = _cols("stations")
     if cols_s:
         if "nome" not in cols_s:
-            _add_col_if_missing("stations", "ALTER TABLE stations ADD COLUMN nome VARCHAR(120) DEFAULT '' NOT NULL")
+            _add("ALTER TABLE stations ADD COLUMN nome VARCHAR(120) DEFAULT '' NOT NULL")
         if "hub" not in cols_s:
-            _add_col_if_missing("stations", "ALTER TABLE stations ADD COLUMN hub VARCHAR(80)")
+            _add("ALTER TABLE stations ADD COLUMN hub VARCHAR(80)")

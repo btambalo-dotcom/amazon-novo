@@ -1,17 +1,21 @@
 {% extends 'base.html' %}
 {% block content %}
-<h1>Relatórios do mês</h1>
+<h1>Relatórios</h1>
+
 <form class="row g-3 mb-3">
-  <div class="col-md-2">
-    <label class="form-label">Mês</label>
-    <input class="form-control" type="number" name="month" min="1" max="12" value="{{ month }}">
+  <div class="col-md-3">
+    <label class="form-label">Data inicial</label>
+    <input class="form-control" type="date" name="start" value="{{ start.isoformat() }}">
   </div>
-  <div class="col-md-2">
-    <label class="form-label">Ano</label>
-    <input class="form-control" type="number" name="year" value="{{ year }}">
+  <div class="col-md-3">
+    <label class="form-label">Data final</label>
+    <input class="form-control" type="date" name="end" value="{{ end.isoformat() }}">
   </div>
-  <div class="col-md-2 align-self-end">
-    <button class="btn btn-primary">Aplicar</button>
+  <div class="col-md-3 align-self-end">
+    <button class="btn btn-primary">Aplicar filtro</button>
+  </div>
+  <div class="col-md-3 align-self-end">
+    <a class="btn btn-outline-secondary" href="?month={{ month }}&year={{ start.year }}">Usar mês</a>
   </div>
 </form>
 
@@ -30,7 +34,7 @@
   </div>
   <div class="col-md-3">
     <div class="card"><div class="card-body">
-      <div class="text-muted">Ganhos (corridas + gorjetas)</div>
+      <div class="text-muted">Ganhos</div>
       <div class="h4">${{ '%.2f'|format(valor + gorjeta) }}</div>
     </div></div>
   </div>
@@ -73,16 +77,32 @@
   </tbody>
 </table>
 
-<h3 class="mt-4">Corridas do mês</h3>
+<h3 class="mt-4">Resumo por estação</h3>
 <table class="table table-striped">
-  <thead><tr><th>Data</th><th>Início</th><th>Fim</th><th>Horas</th><th>Valor</th><th>Gorjeta</th><th>Total</th></tr></thead>
+  <thead><tr><th>Estação</th><th>Corridas</th><th>Horas</th><th>Total (valor+gorjeta)</th></tr></thead>
   <tbody>
-  {% for r in corridas %}
+  {% for nome, qnt, h, total in por_estacao %}
+    <tr>
+      <td>{{ nome or '—' }}</td>
+      <td>{{ qnt }}</td>
+      <td>{{ '%.2f'|format(h) }}</td>
+      <td>${{ '%.2f'|format(total) }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<h3 class="mt-4">Corridas do período</h3>
+<table class="table table-striped">
+  <thead><tr><th>Data</th><th>Início</th><th>Fim</th><th>Horas</th><th>Estação</th><th>Valor</th><th>Gorjeta</th><th>Total</th></tr></thead>
+  <tbody>
+  {% for r, s in corridas %}
     <tr>
       <td>{{ r.inicio.strftime('%d/%m/%Y') }}</td>
       <td>{{ r.inicio.strftime('%H:%M') }}</td>
       <td>{{ r.fim.strftime('%H:%M') }}</td>
       <td>{{ '%.2f'|format(r.horas) }}</td>
+      <td>{{ s.nome if s else '—' }}</td>
       <td>${{ '%.2f'|format(r.valor) }}</td>
       <td>${{ '%.2f'|format(r.gorjeta) }}</td>
       <td>${{ '%.2f'|format(r.valor + r.gorjeta) }}</td>

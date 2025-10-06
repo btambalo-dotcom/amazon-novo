@@ -2,8 +2,8 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center">
   <div class="btn-group">
-    <a class="btn btn-outline-secondary" href="{{ url_for('rides.calendar', year=prev_month.year, month=prev_month.month) }}">« {{ prev_month.month }}/{{ prev_month.year }}</a>
-    <a class="btn btn-outline-secondary" href="{{ url_for('rides.calendar', year=next_month.year, month=next_month.month) }}">{{ next_month.month }}/{{ next_month.year }} »</a>
+    <a class="btn btn-outline-secondary" href="{{ url_for('rides.calendar', year=prev_month.year, month=prev_month.month) }}">« {{ '%02d' % prev_month.month }}/{{ prev_month.year }}</a>
+    <a class="btn btn-outline-secondary" href="{{ url_for('rides.calendar', year=next_month.year, month=next_month.month) }}">{{ '%02d' % next_month.month }}/{{ next_month.year }} »</a>
   </div>
   <h1 class="m-0">Calendário — {{ '%02d' % month }}/{{ year }}</h1>
   <a class="btn btn-primary" href="{{ url_for('rides.nova') }}">Nova corrida</a>

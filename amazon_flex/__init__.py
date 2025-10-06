@@ -1,4 +1,4 @@
-import os, sqlite3
+import os
 from flask import Flask, redirect, url_for
 from .models import db, ensure_schema
 from dotenv import load_dotenv
@@ -26,7 +26,6 @@ def create_app():
     with app.app_context():
         ensure_schema()
 
-    # Blueprints
     from .routes.rides import bp as rides_bp
     from .routes.stations import bp as stations_bp
     from .routes.expenses import bp as expenses_bp

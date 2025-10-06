@@ -18,11 +18,10 @@ def calendar():
     month = int(request.args.get("month", today.month))
     first = date(year, month, 1)
 
-    # Prev/next for navigation
     prev_month = (first.replace(day=1) - timedelta(days=1)).replace(day=1)
     next_month = (first.replace(day=28) + timedelta(days=10)).replace(day=1)
 
-    start = first - timedelta(days=(first.weekday()))  # Monday grid
+    start = first - timedelta(days=(first.weekday()))
     end = (first.replace(day=28) + timedelta(days=10))
     last = date(end.year, end.month, 1) - timedelta(days=1)
     grid_end = last + timedelta(days=(6-last.weekday()))
@@ -65,7 +64,7 @@ def nova():
         db.session.add(ride)
         db.session.commit()
         flash("Corrida criada!", "success")
-        return redirect(url_for("rides.calendar"))
+        return redirect(url_for("rides.view", ride_id=ride.id))
     return render_template("rides/form.html", estacoes=estacoes, ride=None)
 
 @bp.route("/<int:ride_id>", methods=["GET","POST"])
