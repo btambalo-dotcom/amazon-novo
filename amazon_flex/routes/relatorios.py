@@ -1,61 +1,53 @@
-\
 from flask import Blueprint, render_template, request
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from sqlalchemy import func
-from ..models import db, ScheduledRide, Expense, Station
+from ..models import db, ScheduledRide, Expense
 
 bp = Blueprint("relatorios", __name__, url_prefix="/relatorios")
 
-def parse_date(s):
-    return datetime.strptime(s, "%Y-%m-%d")
+def month_range(year, month):
+    first = date(year, month, 1)
+    if month == 12:
+        nxt = date(year+1, 1, 1)
+    else:
+        nxt = date(year, month+1, 1)
+    return first, nxt
 
-@bp.route("/", methods=["GET"])
+@bp.route("/")
 def index():
-    # período padrão: últimos 30 dias
-    fim = datetime.utcnow().date()
-    inicio = fim - timedelta(days=30)
-    s_in = request.args.get("inicio")
-    s_fi = request.args.get("fim")
-    station_id = request.args.get("station_id") or None
+    today = date.today()
+    year = int(request.args.get("year", today.year))
+    month = int(request.args.get("month", today.month))
+    start, end = month_range(year, month)
 
-    if s_in and s_fi:
-        inicio = parse_date(s_in).date()
-        fim = parse_date(s_fi).date()
+    # Resumo corridas
+    q = db.session.query(
+        func.count(ScheduledRide.id),
+        func.coalesce(func.sum(ScheduledRide.horas), 0.0),
+        func.coalesce(func.sum(ScheduledRide.valor), 0.0),
+        func.coalesce(func.sum(ScheduledRide.gorjeta), 0.0),
+    ).filter(ScheduledRide.inicio >= start, ScheduledRide.inicio < end)
+    count, horas, valor, gorjeta = q.one()
 
-    # Consulta corridas
-    q_rides = ScheduledRide.query.filter(
-        ScheduledRide.inicio >= datetime.combine(inicio, datetime.min.time()),
-        ScheduledRide.fim <= datetime.combine(fim, datetime.max.time()),
-        ScheduledRide.exclude_from_reports.is_(False)
-    )
-    if station_id:
-        q_rides = q_rides.filter(ScheduledRide.station_id == int(station_id))
+    # Despesas por tipo
+    despesas = db.session.query(
+        Expense.tipo, func.coalesce(func.sum(Expense.valor), 0.0)
+    ).filter(Expense.data >= start, Expense.data < end).group_by(Expense.tipo).all()
+    despesas_map = {k:v for k,v in despesas}
+    total_despesas = sum(despesas_map.values())
+    lucro = (valor + gorjeta) - total_despesas
 
-    rides = q_rides.order_by(ScheduledRide.inicio.asc()).all()
+    # Média por hora / por corrida
+    media_hora = (valor + gorjeta) / horas if horas else 0.0
+    media_corrida = (valor + gorjeta) / count if count else 0.0
 
-    # Totais receita
-    receita_valor = db.session.query(func.coalesce(func.sum(ScheduledRide.valor),0.0)).filter(q_rides.whereclause).scalar()
-    receita_tips  = db.session.query(func.coalesce(func.sum(ScheduledRide.gorjeta),0.0)).filter(q_rides.whereclause).scalar()
-    receita = float(receita_valor) + float(receita_tips)
-
-    # Despesas no período (todas, independente de estação)
-    despesas_total = db.session.query(func.coalesce(func.sum(Expense.valor),0.0)).filter(
-        Expense.data >= datetime.combine(inicio, datetime.min.time()),
-        Expense.data <= datetime.combine(fim, datetime.max.time()),
-    ).scalar()
-
-    custo = float(despesas_total)
-    lucro = receita - custo
-    margem = (lucro/receita*100.0) if receita > 0 else 0.0
-
-    estacoes = Station.query.order_by(Station.nome).all()
+    # Lista de corridas
+    corridas = ScheduledRide.query.filter(ScheduledRide.inicio >= start, ScheduledRide.inicio < end).order_by(ScheduledRide.inicio.asc()).all()
 
     return render_template("relatorios/index.html",
-                           inicio=inicio, fim=fim,
-                           rides=rides,
-                           receita=round(receita,2),
-                           custo=round(custo,2),
-                           lucro=round(lucro,2),
-                           margem=round(margem,2),
-                           estacoes=estacoes,
-                           station_id=int(station_id) if station_id else None)
+        year=year, month=month, start=start, end=end,
+        count=count, horas=horas, valor=valor, gorjeta=gorjeta,
+        despesas=despesas_map, total_despesas=total_despesas, lucro=lucro,
+        media_hora=media_hora, media_corrida=media_corrida,
+        corridas=corridas
+    )

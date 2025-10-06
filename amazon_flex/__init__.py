@@ -1,4 +1,4 @@
-import os
+import os, sqlite3
 from flask import Flask, redirect, url_for
 from .models import db, ensure_schema
 from dotenv import load_dotenv
@@ -21,16 +21,23 @@ def create_app():
         app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_path}"
         print(f"[INFO] SQLite em {db_path}")
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
     db.init_app(app)
     with app.app_context():
         ensure_schema()
+
+    # Blueprints
     from .routes.rides import bp as rides_bp
     from .routes.stations import bp as stations_bp
     from .routes.expenses import bp as expenses_bp
+    from .routes.relatorios import bp as relatorios_bp
     app.register_blueprint(rides_bp)
     app.register_blueprint(stations_bp)
     app.register_blueprint(expenses_bp)
+    app.register_blueprint(relatorios_bp)
+
     @app.route("/")
     def home():
         return redirect(url_for("rides.calendar"))
+
     return app

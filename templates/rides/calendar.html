@@ -1,12 +1,16 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="d-flex justify-content-between align-items-center">
-  <h1>Calendário</h1>
+  <div class="btn-group">
+    <a class="btn btn-outline-secondary" href="{{ url_for('rides.calendar', year=prev_month.year, month=prev_month.month) }}">« {{ prev_month.month }}/{{ prev_month.year }}</a>
+    <a class="btn btn-outline-secondary" href="{{ url_for('rides.calendar', year=next_month.year, month=next_month.month) }}">{{ next_month.month }}/{{ next_month.year }} »</a>
+  </div>
+  <h1 class="m-0">Calendário — {{ '%02d' % month }}/{{ year }}</h1>
   <a class="btn btn-primary" href="{{ url_for('rides.nova') }}">Nova corrida</a>
 </div>
 <div class="table-responsive mt-3">
-<table class="table table-bordered align-middle text-center">
-  <thead class="table-secondary">
+<table class="table table-bordered align-middle text-center calendar">
+  <thead class="table-secondary sticky-header">
     <tr>
       <th>Seg</th><th>Ter</th><th>Qua</th><th>Qui</th><th>Sex</th><th>Sáb</th><th>Dom</th>
     </tr>
@@ -16,14 +20,14 @@
     <tr>
       {% for cell in week %}
         {% set d = cell.date %}
-        <td class="text-start" style="min-width: 200px; vertical-align: top;">
-          <div class="small fw-bold {{ 'text-muted' if d.month != first.month else '' }}">{{ d.day }}/{{ '%02d' % d.month }}</div>
+        <td class="text-start {{ 'other-month' if d.month != first.month else '' }}">
+          <div class="small fw-bold">{{ d.day }}/{{ '%02d' % d.month }}</div>
           {% for r in cell.rides %}
-            <div class="mt-1 p-1 border rounded bg-white small">
-              <a href="{{ url_for('rides.view', ride_id=r.id) }}" class="text-decoration-none">{{ r.titulo or 'Corrida' }}</a>
+            <a class="badge-run text-decoration-none" href="{{ url_for('rides.view', ride_id=r.id) }}">
+              <div class="title">{{ r.titulo or 'Corrida' }}</div>
               <div>{{ r.inicio.strftime('%H:%M') }}–{{ r.fim.strftime('%H:%M') }}</div>
               <div>${{ '%.2f'|format(r.valor + r.gorjeta) }}</div>
-            </div>
+            </a>
           {% endfor %}
         </td>
       {% endfor %}

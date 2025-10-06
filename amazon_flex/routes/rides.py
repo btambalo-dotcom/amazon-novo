@@ -17,15 +17,23 @@ def calendar():
     year = int(request.args.get("year", today.year))
     month = int(request.args.get("month", today.month))
     first = date(year, month, 1)
-    start = first - timedelta(days=first.weekday())
-    end = first.replace(day=28) + timedelta(days=10)
+
+    # Prev/next for navigation
+    prev_month = (first.replace(day=1) - timedelta(days=1)).replace(day=1)
+    next_month = (first.replace(day=28) + timedelta(days=10)).replace(day=1)
+
+    start = first - timedelta(days=(first.weekday()))  # Monday grid
+    end = (first.replace(day=28) + timedelta(days=10))
     last = date(end.year, end.month, 1) - timedelta(days=1)
     grid_end = last + timedelta(days=(6-last.weekday()))
+
     rides = ScheduledRide.query.filter(ScheduledRide.inicio >= start, ScheduledRide.inicio < grid_end+timedelta(days=1)).all()
+
     by_day = {}
     for r in rides:
         d = r.inicio.date()
         by_day.setdefault(d, []).append(r)
+
     weeks = []
     cur = start
     for _ in range(6):
@@ -34,7 +42,9 @@ def calendar():
             wk.append({"date": cur, "rides": by_day.get(cur, [])})
             cur += timedelta(days=1)
         weeks.append(wk)
-    return render_template("rides/calendar.html", year=year, month=month, first=first, last=last, weeks=weeks)
+
+    return render_template("rides/calendar.html", year=year, month=month, first=first, weeks=weeks,
+                           prev_month=prev_month, next_month=next_month)
 
 @bp.route("/nova", methods=["GET","POST"])
 def nova():
@@ -55,7 +65,7 @@ def nova():
         db.session.add(ride)
         db.session.commit()
         flash("Corrida criada!", "success")
-        return redirect(url_for("rides.view", ride_id=ride.id))
+        return redirect(url_for("rides.calendar"))
     return render_template("rides/form.html", estacoes=estacoes, ride=None)
 
 @bp.route("/<int:ride_id>", methods=["GET","POST"])

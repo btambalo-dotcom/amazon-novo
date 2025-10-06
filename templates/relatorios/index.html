@@ -1,57 +1,92 @@
-\
-{% extends "base.html" %}
+{% extends 'base.html' %}
 {% block content %}
-<h1>Relatórios</h1>
-
-<form class="row g-3" method="get">
-  <div class="col-md-3">
-    <label class="form-label">Início</label>
-    <input type="date" name="inicio" class="form-control" value="{{ inicio|strftime('%Y-%m-%d') }}">
+<h1>Relatórios do mês</h1>
+<form class="row g-3 mb-3">
+  <div class="col-md-2">
+    <label class="form-label">Mês</label>
+    <input class="form-control" type="number" name="month" min="1" max="12" value="{{ month }}">
   </div>
-  <div class="col-md-3">
-    <label class="form-label">Fim</label>
-    <input type="date" name="fim" class="form-control" value="{{ fim|strftime('%Y-%m-%d') }}">
+  <div class="col-md-2">
+    <label class="form-label">Ano</label>
+    <input class="form-control" type="number" name="year" value="{{ year }}">
   </div>
-  <div class="col-md-4">
-    <label class="form-label">Estação</label>
-    <select name="station_id" class="form-select">
-      <option value="">Todas</option>
-      {% for e in estacoes %}
-        <option value="{{ e.id }}" {% if station_id and station_id==e.id %}selected{% endif %}>
-          {{ e.nome }}{% if e.codigo %} ({{ e.codigo }}){% endif %}
-        </option>
-      {% endfor %}
-    </select>
-  </div>
-  <div class="col-md-2 d-flex align-items-end">
-    <button class="btn btn-primary w-100">Filtrar</button>
+  <div class="col-md-2 align-self-end">
+    <button class="btn btn-primary">Aplicar</button>
   </div>
 </form>
 
-<hr>
+<div class="row g-3">
+  <div class="col-md-3">
+    <div class="card"><div class="card-body">
+      <div class="text-muted">Corridas</div>
+      <div class="h4">{{ count }}</div>
+    </div></div>
+  </div>
+  <div class="col-md-3">
+    <div class="card"><div class="card-body">
+      <div class="text-muted">Horas</div>
+      <div class="h4">{{ '%.2f'|format(horas) }}</div>
+    </div></div>
+  </div>
+  <div class="col-md-3">
+    <div class="card"><div class="card-body">
+      <div class="text-muted">Ganhos (corridas + gorjetas)</div>
+      <div class="h4">${{ '%.2f'|format(valor + gorjeta) }}</div>
+    </div></div>
+  </div>
+  <div class="col-md-3">
+    <div class="card"><div class="card-body">
+      <div class="text-muted">Despesas</div>
+      <div class="h4">${{ '%.2f'|format(total_despesas) }}</div>
+    </div></div>
+  </div>
+</div>
 
-<h4>Resumo do período</h4>
-<ul>
-  <li><strong>Receita:</strong> $ {{ '%.2f'|format(receita) }}</li>
-  <li><strong>Custo:</strong> $ {{ '%.2f'|format(custo) }}</li>
-  <li><strong>Lucro:</strong> $ {{ '%.2f'|format(lucro) }}</li>
-  <li><strong>Margem:</strong> {{ '%.2f'|format(margem) }}%</li>
-</ul>
+<div class="row g-3 mt-1">
+  <div class="col-md-3">
+    <div class="card"><div class="card-body">
+      <div class="text-muted">Lucro</div>
+      <div class="h4">${{ '%.2f'|format(lucro) }}</div>
+    </div></div>
+  </div>
+  <div class="col-md-3">
+    <div class="card"><div class="card-body">
+      <div class="text-muted">Média por hora</div>
+      <div class="h4">${{ '%.2f'|format(media_hora) }}</div>
+    </div></div>
+  </div>
+  <div class="col-md-3">
+    <div class="card"><div class="card-body">
+      <div class="text-muted">Média por corrida</div>
+      <div class="h4">${{ '%.2f'|format(media_corrida) }}</div>
+    </div></div>
+  </div>
+</div>
 
-<h4>Corridas consideradas (exclui as marcadas como "Tirar do relatório")</h4>
-<table class="table table-sm table-striped">
-  <thead><tr><th>Data</th><th>Estação</th><th>Horas</th><th>Valor</th><th>Gorjeta</th></tr></thead>
+<h3 class="mt-4">Despesas por tipo</h3>
+<table class="table table-sm table-striped" style="max-width:600px">
+  <thead><tr><th>Tipo</th><th>Total</th></tr></thead>
   <tbody>
-  {% for r in rides %}
+    <tr><td>Combustível</td><td>${{ '%.2f'|format(despesas.get('combustivel',0)) }}</td></tr>
+    <tr><td>Pedágio</td><td>${{ '%.2f'|format(despesas.get('pedagio',0)) }}</td></tr>
+    <tr><td>Outros</td><td>${{ '%.2f'|format(despesas.get('outros',0)) }}</td></tr>
+  </tbody>
+</table>
+
+<h3 class="mt-4">Corridas do mês</h3>
+<table class="table table-striped">
+  <thead><tr><th>Data</th><th>Início</th><th>Fim</th><th>Horas</th><th>Valor</th><th>Gorjeta</th><th>Total</th></tr></thead>
+  <tbody>
+  {% for r in corridas %}
     <tr>
-      <td>{{ r.inicio.strftime('%d/%m/%Y %H:%M') }} - {{ r.fim.strftime('%H:%M') }}</td>
-      <td>{{ r.station.nome if r.station else '-' }}</td>
+      <td>{{ r.inicio.strftime('%d/%m/%Y') }}</td>
+      <td>{{ r.inicio.strftime('%H:%M') }}</td>
+      <td>{{ r.fim.strftime('%H:%M') }}</td>
       <td>{{ '%.2f'|format(r.horas) }}</td>
       <td>${{ '%.2f'|format(r.valor) }}</td>
       <td>${{ '%.2f'|format(r.gorjeta) }}</td>
+      <td>${{ '%.2f'|format(r.valor + r.gorjeta) }}</td>
     </tr>
-  {% else %}
-    <tr><td colspan="5" class="text-center text-muted">Sem corridas no período.</td></tr>
   {% endfor %}
   </tbody>
 </table>
