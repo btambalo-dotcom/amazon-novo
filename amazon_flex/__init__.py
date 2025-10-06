@@ -10,23 +10,22 @@ def create_app():
 
     # Configuração
     # Configuração
-    app.config["SECRET_KEY"] = os.getenv("SECRET_KEY","dev-key")
+    app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev-key")
 
-    # Preferir DATABASE_URL (ex: Render PostgreSQL). Fallback: SQLite em /tmp
+    # Banco persistente no Render Disk (/data) ou PostgreSQL se houver DATABASE_URL
     database_url = os.getenv("DATABASE_URL")
     if database_url:
         app.config["SQLALCHEMY_DATABASE_URI"] = database_url
     else:
-        db_file = os.getenv("DB_FILE","flex.db")
-        tmp_dir = "/tmp"
+        db_file = os.getenv("DB_FILE", "app.db")
+        data_dir = "/data"
         try:
-            os.makedirs(tmp_dir, exist_ok=True)
-        except Exception as _e:
-            # Em alguns ambientes /tmp já existe; ignorar erro
-            pass
-        db_path = os.path.join(tmp_dir, db_file)
+            os.makedirs(data_dir, exist_ok=True)
+        except Exception as e:
+            print(f"[WARN] Não foi possível criar /data: {e}")
+        db_path = os.path.join(data_dir, db_file)
         app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_path}"
-        print(f"[INFO] Usando SQLite em {db_path}")
+        print(f"[INFO] Usando SQLite persistente em {db_path}")
 
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
