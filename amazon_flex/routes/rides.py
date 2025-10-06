@@ -11,6 +11,12 @@ def calcular_horas(i: datetime, f: datetime) -> float:
     if not i or not f or f <= i: return 0.0
     return round((f-i).total_seconds()/3600.0, 2)
 
+
+@bp.route("/")
+def index():
+    rows = db.session.query(ScheduledRide, Station).outerjoin(Station, ScheduledRide.station_id==Station.id)        .order_by(ScheduledRide.inicio.desc()).limit(200).all()
+    return render_template("rides/index.html", rides=rows)
+
 @bp.route("/calendario")
 def calendar():
     today = date.today()
@@ -112,3 +118,13 @@ def del_expense(ride_id, exp_id):
     db.session.commit()
     flash("Despesa removida.", "warning")
     return redirect(url_for("rides.view", ride_id=ride_id))
+
+
+@bp.post("/<int:ride_id>/delete")
+def delete(ride_id):
+    r = ScheduledRide.query.get_or_404(ride_id)
+    db.session.delete(r)
+    db.session.commit()
+    flash("Corrida excluída.", "warning")
+    return redirect(url_for("rides.calendar"))
+
