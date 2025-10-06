@@ -5,7 +5,13 @@
     <a class="btn btn-outline-secondary" href="{{ url_for('rides.calendar', year=prev_month.year, month=prev_month.month) }}">« {{ '%02d' % prev_month.month }}/{{ prev_month.year }}</a>
     <a class="btn btn-outline-secondary" href="{{ url_for('rides.calendar', year=next_month.year, month=next_month.month) }}">{{ '%02d' % next_month.month }}/{{ next_month.year }} »</a>
   </div>
-  <h1 class="m-0">Calendário — {{ '%02d' % month }}/{{ year }}</h1>
+  <h1 class="m-0">Cal — {{ '%02d' % month }}/{{ year }}</h1>
+  <div class="btn-group ms-2">
+    <a class="btn btn-outline-secondary" href="{{ url_for('rides.index') }}">Lista</a>
+    <a class="btn btn-outline-secondary active" href="{{ url_for('rides.calendar', year=year, month=month) }}">Calendário</a>
+    <a class="btn btn-outline-secondary" href="{{ url_for('rides.agenda', year=year, month=month) }}">Agenda</a>
+  </div>
+
   <a class="btn btn-primary" href="{{ url_for('rides.nova') }}">Nova corrida</a>
 </div>
 <div class="table-responsive mt-3">
@@ -41,3 +47,5 @@
 </table>
 </div>
 {% endblock %}
+
+<a class="btn btn-primary btn-lg btn-floating-new d-sm-none" href="{{ url_for('rides.nova') }}">Nova</a>

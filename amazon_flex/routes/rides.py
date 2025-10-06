@@ -128,3 +128,30 @@ def delete(ride_id):
     flash("Corrida excluída.", "warning")
     return redirect(url_for("rides.calendar"))
 
+
+
+@bp.route("/agenda")
+def agenda():
+    # mesma navegação de mês do calendário
+    today = date.today()
+    year = int(request.args.get("year", today.year))
+    month = int(request.args.get("month", today.month))
+    first = date(year, month, 1)
+    if month == 12:
+        nxt = date(year+1, 1, 1)
+    else:
+        nxt = date(year, month+1, 1)
+
+    # busca corridas do mês
+    rows = db.session.query(ScheduledRide, Station).outerjoin(Station, ScheduledRide.station_id==Station.id)        .filter(ScheduledRide.inicio >= first, ScheduledRide.inicio < nxt)        .order_by(ScheduledRide.inicio.asc()).all()
+
+    # agrupa por dia
+    grouped = {}
+    for r, s in rows:
+        d = r.inicio.date()
+        grouped.setdefault(d, []).append((r, s))
+
+    # ordenar chaves
+    days = sorted(grouped.keys())
+    return render_template("rides/agenda.html", year=year, month=month, days=days, grouped=grouped)
+
