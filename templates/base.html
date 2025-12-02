@@ -32,20 +32,92 @@
     main.container{padding-left: max(1rem, env(safe-area-inset-left)); padding-right:max(1rem, env(safe-area-inset-right));}
   }
 
+
+  .mobile-menu{
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 230px;
+    max-width: 80%;
+    height: 100%;
+    background: #212529;
+    padding: 1.5rem 1rem;
+    box-shadow: -2px 0 6px rgba(0,0,0,.35);
+    z-index: 1050;
+    display: none;
+  }
+  .mobile-menu.open{
+    display: block;
+  }
+  .mobile-menu .nav-link{
+    display:block;
+    color:#f8f9fa;
+    padding:.4rem 0;
+    font-size:1rem;
+  }
+  .mobile-menu .nav-link + .nav-link{
+    border-top:1px solid rgba(255,255,255,.08);
+    margin-top:.35rem;
+    padding-top:.5rem;
+  }
+  .mobile-menu-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:1rem;
+    color:#f8f9fa;
+    font-size:1.05rem;
+    font-weight:500;
+  }
+  .navbar-toggler-custom{
+    border:none;
+    background:transparent;
+    color:#f8f9fa;
+    font-size:1.4rem;
+  }
+  @media (min-width: 577px){
+    .navbar-desktop-nav{
+      display:flex !important;
+    }
+    .navbar-toggler-custom{
+      display:none;
+    }
+  }
+  @media (max-width: 576px){
+    .navbar-desktop-nav{
+      display:none !important;
+    }
+  }
+
   </style>
 </head>
 <body class="bg-light">
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <div class="container">
-    <a class="navbar-brand" href="/corridas/calendario">Flex</a>
-    <div class="navbar-nav">
+<nav class="navbar navbar-dark bg-dark">
+  <div class="container d-flex justify-content-between align-items-center">
+    <a class="navbar-brand mb-0" href="/corridas/calendario">Flex</a>
+    <button class="navbar-toggler-custom d-inline d-sm-none" type="button" id="btnMobileMenu" aria-label="Menu">
+      &#9776;
+    </button>
+    <div class="navbar-nav navbar-desktop-nav">
       <a class="nav-link" href="/corridas/calendario">Calendário</a>
+      <a class="nav-link" href="/corridas/nova">Nova corrida</a>
       <a class="nav-link" href="/relatorios/">Relatórios</a>
       <a class="nav-link" href="/despesas/">Despesas</a>
       <a class="nav-link" href="/estacoes/">Estações</a>
     </div>
   </div>
 </nav>
+<div id="mobileMenu" class="mobile-menu d-sm-none">
+  <div class="mobile-menu-header">
+    <span>Menu</span>
+    <button type="button" class="navbar-toggler-custom" id="btnMobileMenuClose">&times;</button>
+  </div>
+  <a class="nav-link" href="/corridas/calendario">Calendário</a>
+  <a class="nav-link" href="/corridas/nova">Nova corrida</a>
+  <a class="nav-link" href="/relatorios/">Relatórios</a>
+  <a class="nav-link" href="/despesas/">Despesas</a>
+  <a class="nav-link" href="/estacoes/">Estações</a>
+</div>
 <main class="container py-4">
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}

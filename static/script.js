@@ -27,3 +27,38 @@
     });
   });
 })(); 
+
+
+(function(){
+  window.addEventListener('DOMContentLoaded', function(){
+    var btnOpen = document.getElementById('btnMobileMenu');
+    var btnClose = document.getElementById('btnMobileMenuClose');
+    var menu = document.getElementById('mobileMenu');
+    function closeMenu(){
+      if(menu){ menu.classList.remove('open'); }
+    }
+    function openMenu(){
+      if(menu){ menu.classList.add('open'); }
+    }
+    if(btnOpen){
+      btnOpen.addEventListener('click', function(e){
+        e.preventDefault();
+        if(menu && menu.classList.contains('open')){ closeMenu(); } else { openMenu(); }
+      });
+    }
+    if(btnClose){
+      btnClose.addEventListener('click', function(e){
+        e.preventDefault();
+        closeMenu();
+      });
+    }
+    // close when clicking outside
+    document.addEventListener('click', function(e){
+      if(!menu) return;
+      if(!menu.classList.contains('open')) return;
+      var target = e.target;
+      if(target===menu || target===btnOpen || menu.contains(target)) return;
+      closeMenu();
+    });
+  });
+})();
