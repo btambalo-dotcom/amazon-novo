@@ -1,29 +1,24 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="d-flex flex-column flex-md-row align-items-md-center justify-content-md-between gap-2 mb-3">
+<div class="d-flex justify-content-between align-items-center">
   <div class="btn-group">
     <a class="btn btn-outline-secondary" href="{{ url_for('rides.calendar', year=prev_month.year, month=prev_month.month) }}">« {{ '%02d' % prev_month.month }}/{{ prev_month.year }}</a>
     <a class="btn btn-outline-secondary" href="{{ url_for('rides.calendar', year=next_month.year, month=next_month.month) }}">{{ '%02d' % next_month.month }}/{{ next_month.year }} »</a>
   </div>
-  <h1 class="h4 m-0 text-center flex-grow-1">Cal — {{ '%02d' % month }}/{{ year }}</h1>
-  <div class="btn-group">
+  <h1 class="m-0">Cal — {{ '%02d' % month }}/{{ year }}</h1>
+  <div class="btn-group ms-2">
     <a class="btn btn-outline-secondary" href="{{ url_for('rides.index') }}">Lista</a>
     <a class="btn btn-outline-secondary active" href="{{ url_for('rides.calendar', year=year, month=month) }}">Calendário</a>
     <a class="btn btn-outline-secondary" href="{{ url_for('rides.agenda', year=year, month=month) }}">Agenda</a>
   </div>
-</div>
 
-<div class="table-responsive">
-<table class="table table-bordered calendar">
-  <thead class="table-light">
+  <a class="btn btn-primary" href="{{ url_for('rides.nova') }}">Nova corrida</a>
+</div>
+<div class="table-responsive mt-3">
+<table class="table table-bordered align-middle text-center calendar">
+  <thead class="table-secondary sticky-header">
     <tr>
-      <th>Seg</th>
-      <th>Ter</th>
-      <th>Qua</th>
-      <th>Qui</th>
-      <th>Sex</th>
-      <th>Sáb</th>
-      <th>Dom</th>
+      <th>Seg</th><th>Ter</th><th>Qua</th><th>Qui</th><th>Sex</th><th>Sáb</th><th>Dom</th>
     </tr>
   </thead>
   <tbody>
@@ -31,14 +26,15 @@
     <tr>
       {% for cell in week %}
         {% set d = cell.date %}
-        {% set rides_day = cell.rides %}
-        <td class="{% if d.month != month %}other-month{% endif %}">
-          <div class="small text-muted">{{ '%d/%m' % (d.day, ) }}</div>
-          {% for r in rides_day %}
-            {% set total = (r.valor or 0) + (r.gorjeta or 0) %}
-            <a href="{{ url_for('rides.view', ride_id=r.id) }}"
-               class="badge-run {% if total < 60 %}total-low{% elif total < 100 %}total-med{% else %}total-high{% endif %}">
-              <div class="title">{{ r.titulo or 'Corrida' }}</div>
+        <td class="text-start {{ 'other-month' if d.month != first.month else '' }}">
+          <div class="small fw-bold">{{ d.day }}/{{ '%02d' % d.month }}</div>
+          {% for r in cell.rides %}
+            {% set total = (r.valor + r.gorjeta) %}
+            {% set cls = 'total-low' if total < 50 else ('total-med' if total < 100 else 'total-high') %}
+            <a class="badge-run {{ cls }} text-decoration-none" href="{{ url_for('rides.view', ride_id=r.id) }}">
+              <div class="d-flex justify-content-between align-items-center"><span class="title">{{ r.titulo or 'Corrida' }}</span>
+<form method="post" action="{{ url_for('rides.delete', ride_id=r.id) }}" onsubmit="return confirm('Excluir esta corrida? As despesas vinculadas também serão apagadas.');">
+<button class="btn btn-sm btn-link text-danger p-0" title="Excluir">✕</button></form></div>
               <div>{{ r.inicio.strftime('%H:%M') }}–{{ r.fim.strftime('%H:%M') }}</div>
               <div>${{ '%.2f'|format(total) }}</div>
             </a>
@@ -50,6 +46,6 @@
   </tbody>
 </table>
 </div>
+{% endblock %}
 
 <a class="btn btn-primary btn-lg btn-floating-new d-sm-none" href="{{ url_for('rides.nova') }}">Nova</a>
-{% endblock %}

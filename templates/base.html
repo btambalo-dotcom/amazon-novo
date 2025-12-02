@@ -8,47 +8,44 @@
   <style>
     .calendar th, .calendar td { min-width: 190px; vertical-align: top; }
     .calendar .other-month { color: #9aa0a6; }
-    .badge-run { display:block; padding:.35rem .55rem; margin:.35rem 0; border-radius:.5rem; background:#ffffff; box-shadow:0 1px 1px rgba(0,0,0,.04); text-decoration:none; color:inherit; }
+    .badge-run { display:block; padding:.35rem .55rem; margin:.3rem 0; border-radius:.5rem; border:1px solid #e3e3e3; background:#ffffff; box-shadow:0 1px 1px rgba(0,0,0,.04); }
     .badge-run .title { font-weight:600; }
     .badge-run.total-low { background:#e8f5e9; }
     .badge-run.total-med { background:#fff8e1; }
     .badge-run.total-high { background:#e3f2fd; }
     .sticky-header { position: sticky; top: 0; z-index: 2; }
-
-    .navbar-nav { display:flex; flex-direction:row; gap:.5rem; }
-
-    /* --------- MOBILE --------- */
-    @media (max-width: 576px){
-      body{padding-bottom:72px;}
-      .navbar .navbar-brand{font-size:1.05rem;}
-      .navbar .nav-link{padding:.25rem .5rem;font-size:.95rem;}
-      .calendar th, .calendar td { min-width: 120px; }
-      .calendar .table{font-size:.95rem;}
-      .table-responsive{overflow-x:auto;-webkit-overflow-scrolling:touch;}
-      .badge-run{margin:.35rem 0; padding:.4rem .55rem; border-radius:.6rem;}
-      .btn-floating-new{
-        position: fixed; right: max(12px, env(safe-area-inset-right));
-        bottom: max(12px, env(safe-area-inset-bottom));
-        z-index: 10;
-      }
-      main.container{padding-left: max(1rem, env(safe-area-inset-left)); padding-right:max(1rem, env(safe-area-inset-right));}
+  
+  /* --------- MOBILE --------- */
+  @media (max-width: 576px){
+    body{padding-bottom:72px;}
+    .navbar .navbar-brand{font-size:1.05rem;}
+    .navbar .nav-link{padding:.25rem .5rem;font-size:.95rem;}
+    .calendar th, .calendar td { min-width: 120px; }
+    .calendar .table{font-size:.95rem;}
+    .table-responsive{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+    .badge-run{margin:.35rem 0; padding:.4rem .55rem; border-radius:.6rem;}
+    .btn-floating-new{
+      position: fixed; right: max(12px, env(safe-area-inset-right));
+      bottom: max(12px, env(safe-area-inset-bottom));
+      z-index: 10;
     }
+    main.container{padding-left: max(1rem, env(safe-area-inset-left)); padding-right:max(1rem, env(safe-area-inset-right));}
+  }
+
   </style>
 </head>
 <body class="bg-light">
-<nav class="navbar navbar-dark bg-dark">
-  <div class="container d-flex justify-content-between">
-    <a class="navbar-brand" href="{{ url_for('rides.calendar') }}">Flex</a>
-    <div class="navbar-nav ms-auto">
-      <a class="nav-link" href="{{ url_for('rides.calendar') }}">Calendário</a>
-      <a class="nav-link" href="{{ url_for('rides.nova') }}">Nova corrida</a>
-      <a class="nav-link" href="{{ url_for('relatorios.index') }}">Relatórios</a>
-      <a class="nav-link" href="{{ url_for('expenses.index') }}">Despesas</a>
-      <a class="nav-link" href="{{ url_for('stations.index') }}">Estações</a>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container">
+    <a class="navbar-brand" href="/corridas/calendario">Flex</a>
+    <div class="navbar-nav">
+      <a class="nav-link" href="/corridas/calendario">Calendário</a>
+      <a class="nav-link" href="/relatorios/">Relatórios</a>
+      <a class="nav-link" href="/despesas/">Despesas</a>
+      <a class="nav-link" href="/estacoes/">Estações</a>
     </div>
   </div>
 </nav>
-
 <main class="container py-4">
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
